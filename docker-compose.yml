@@ -1,0 +1,33 @@
+version: '3'
+
+services:
+  jenkins:
+    image: myjenkins-blueocean:2.426.3-1
+    restart: on-failure
+    ports:
+      - "8080:8080"
+      - "50000:50000"
+    volumes:
+      - jenkins-data:/var/jenkins_home
+      - jenkins-docker-certs:/certs/client:ro
+    environment:
+      DOCKER_HOST: tcp://docker:2376
+      DOCKER_CERT_PATH: /certs/client
+      DOCKER_TLS_VERIFY: '1'
+    networks:
+      - jenkins
+
+  agent:
+    build: ./app
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+    networks:
+      - jenkins
+
+networks:
+  jenkins:
+    driver: bridge
+
+volumes:
+  jenkins-data:
+  jenkins-docker-certs:
